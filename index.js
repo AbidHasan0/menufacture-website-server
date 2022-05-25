@@ -36,16 +36,21 @@ async function run() {
          const products = await productCollection.findOne(query);
          res.send(products);
 
+      });
+
+      app.get('/order', async (req, res) => {
+         const buyer = req.query.buyer;
+         const query = { buyer: buyer };
+         const orders = await orderCollection.find(query).toArray();
+         res.send(orders);
+
       })
 
       app.post('/order', async (req, res) => {
          const order = req.body;
          const result = await orderCollection.insertOne(order);
          res.send(result);
-      })
-
-
-
+      });
 
 
    }
