@@ -15,22 +15,6 @@ app.use(express.json());
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.l1q73.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-// function verifyJWT(req, res, next) {
-//    console.log('abc')
-//    // const authHeader = req.headers.authorization;
-//    // if (!authHeader) {
-//    //       return res.status(401).send({ message: 'UnAuthorized access' });
-//    //    }
-//    //    const token = authHeader.split(' ')[1];
-//    //    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-//    //       if (err) {
-//    //          return res.status(403).send({ message: 'Forbidden access' })
-//    //       }
-//    //       req.decoded = decoded;
-//    //       next();
-//    //    });
-// }
-
 
 async function run() {
 
@@ -48,6 +32,32 @@ async function run() {
 
       });
 
+      // app.get('/user', async (req, res) => {
+      //    const users = await userCollection.find().toArray();
+      //    res.send(users);
+      // })
+
+      app.get('/admin/:email', async (req, res) => {
+         const email = req.params.email;
+         const user = await userCollection.findOne({ email: email });
+         const isAdmin = user.role === 'admin';
+         res.send({ admin: isAdmin })
+      })
+
+
+
+      app.put('/user/admin/:email', async (req, res) => {
+         const email = req.params.email;
+         const filter = { email: email };
+
+         const updateDoc = {
+            $set: { role: 'admin' },
+         };
+         const result = await userCollection.updateOne(filter, updateDoc);
+         res.send(result);
+
+
+      });
 
       app.put('/user/:email', async (req, res) => {
          const email = req.params.email;
@@ -63,6 +73,11 @@ async function run() {
 
       });
 
+      app.get('/user', async (req, res) => {
+         const users = await userCollection.find().toArray();
+         res.send(users);
+      })
+
 
       app.get('/product/:id', async (req, res) => {
          const id = req.params.id;
@@ -72,6 +87,8 @@ async function run() {
 
       });
 
+
+
       app.get('/order', async (req, res) => {
          const buyer = req.query.buyer;
          const query = { buyer: buyer };
@@ -79,6 +96,13 @@ async function run() {
          return res.send(orders);
 
       });
+
+      // app.get('/order', async (req, res) => {
+      //    const orders = await orderCollection.find().toArray();
+      //    res.send(orders);
+      // });
+
+
 
       app.post('/order', async (req, res) => {
          const order = req.body;
@@ -104,4 +128,4 @@ app.get('/', (req, res) => {
 
 app.listen(port, () => {
    console.log(`Car app listening on port ${port}`)
-})
+});
